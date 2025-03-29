@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sale Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #e2e8f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      width: 90%;
+      max-width: 400px;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin: 10px;
+    }
+    h3, h4 {
+      text-align: center;
+      color: #2d3748;
+      margin: 10px 0;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background-color: #3182ce;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    button:hover {
+      background-color: #2b6cb0;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 12px;
+      background-color: #edf2f7;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 14px;
+      color: #2d3748;
+    }
+    .result p {
+      margin: 6px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="sale-calculator">
+    <h3>Sale Calculator</h3>
+    
+    <!-- Diesel Machine A -->
+    <h4>Diesel Machine A</h4>
+    <input type="number" id="diesel-a-old" placeholder="Old Reading (A) in Liters" step="any" />
+    <input type="number" id="diesel-a-new" placeholder="New Reading (A) in Liters" step="any" />
+    
+    <!-- Diesel Machine B -->
+    <h4>Diesel Machine B</h4>
+    <input type="number" id="diesel-b-old" placeholder="Old Reading (B) in Liters" step="any" />
+    <input type="number" id="diesel-b-new" placeholder="New Reading (B) in Liters" step="any" />
+    
+    <!-- Petrol Machine A -->
+    <h4>Petrol Machine A</h4>
+    <input type="number" id="petrol-a-old" placeholder="Old Reading (A) in Liters" step="any" />
+    <input type="number" id="petrol-a-new" placeholder="New Reading (A) in Liters" step="any" />
+    
+    <!-- Petrol Machine B -->
+    <h4>Petrol Machine B</h4>
+    <input type="number" id="petrol-b-old" placeholder="Old Reading (B) in Liters" step="any" />
+    <input type="number" id="petrol-b-new" placeholder="New Reading (B) in Liters" step="any" />
+    
+    <!-- Fuel Rates -->
+    <h4>Set Diesel Rate (₹/Liter)</h4>
+    <input type="number" id="diesel-rate" placeholder="Enter Diesel Rate" step="any" />
+    <h4>Set Petrol Rate (₹/Liter)</h4>
+    <input type="number" id="petrol-rate" placeholder="Enter Petrol Rate" step="any" />
+    
+    <button onclick="calculateSales()">Calculate Sales</button>
+    
+    <!-- Sales Result Display -->
+    <div class="result" id="sales-result" style="display:none;">
+      <h4>Sales Summary</h4>
+      <div id="machine-results"></div>
+      <p id="total-sales"></p>
+    </div>
+  </div>
+
+  <script>
+    function calculateSales() {
+      // Get readings for Diesel Machine A
+      const dieselAOld = parseFloat(document.getElementById('diesel-a-old').value);
+      const dieselANew = parseFloat(document.getElementById('diesel-a-new').value);
+      // Diesel Machine B
+      const dieselBOld = parseFloat(document.getElementById('diesel-b-old').value);
+      const dieselBNew = parseFloat(document.getElementById('diesel-b-new').value);
+      // Petrol Machine A
+      const petrolAOld = parseFloat(document.getElementById('petrol-a-old').value);
+      const petrolANew = parseFloat(document.getElementById('petrol-a-new').value);
+      // Petrol Machine B
+      const petrolBOld = parseFloat(document.getElementById('petrol-b-old').value);
+      const petrolBNew = parseFloat(document.getElementById('petrol-b-new').value);
+      
+      // Get fuel rates from input and save to localStorage
+      const dieselRate = parseFloat(document.getElementById('diesel-rate').value);
+      const petrolRate = parseFloat(document.getElementById('petrol-rate').value);
+      
+      if (isNaN(dieselRate) || isNaN(petrolRate) || dieselRate <= 0 || petrolRate <= 0) {
+        alert("Please enter valid positive rates for Diesel and Petrol.");
+        return;
+      }
+      
+      localStorage.setItem('diesel-rate', dieselRate);
+      localStorage.setItem('petrol-rate', petrolRate);
+      
+      let totalAmount = 0;
+      let output = "";
+      
+      // Function to process each machine
+      function processMachine(label, oldVal, newVal, rate) {
+        if (!isNaN(oldVal) && !isNaN(newVal) && newVal > oldVal) {
+          const litersSold = newVal - oldVal;
+          const amount = litersSold * rate;
+          totalAmount += amount;
+          output += `<p>${label}: ${litersSold.toFixed(2)} Liters, Amount: ₹${amount.toFixed(2)}</p>`;
+        }
+      }
+      
+      // Process each machine; only machines with valid readings will be processed
+      processMachine("Diesel Machine A", dieselAOld, dieselANew, dieselRate);
+      processMachine("Diesel Machine B", dieselBOld, dieselBNew, dieselRate);
+      processMachine("Petrol Machine A", petrolAOld, petrolANew, petrolRate);
+      processMachine("Petrol Machine B", petrolBOld, petrolBNew, petrolRate);
+      
+      if (output === "") {
+        alert("Please enter valid readings (ensure new reading is greater than old reading) for at least one machine.");
+        return;
+      }
+      
+      document.getElementById('machine-results').innerHTML = output;
+      document.getElementById('total-sales').textContent = `Total Sales Amount: ₹${totalAmount.toFixed(2)}`;
+      document.getElementById('sales-result').style.display = 'block';
+      
+      // Save the sales data in localStorage for future reference
+      const salesData = { totalAmount, details: output };
+      localStorage.setItem('salesData', JSON.stringify(salesData));
+    }
+  </script>
+
+</body>
+</html>
